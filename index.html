@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Route Planner</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+body{
+font-family:Arial;
+margin:0;
+background:#111;
+color:white;
+}
+
+#map{
+height:60vh;
+}
+
+.panel{
+padding:10px;
+background:#222;
+}
+
+input{
+width:70%;
+padding:10px;
+}
+
+button{
+padding:10px;
+margin:5px;
+}
+
+.stop{
+padding:5px;
+border-bottom:1px solid #444;
+}
+</style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<div class="panel">
+
+<input id="address" placeholder="Inserisci indirizzo o azienda">
+
+<button onclick="addStop()">Aggiungi</button>
+
+<button onclick="optimize()">Ottimizza</button>
+
+<div id="list"></div>
+
+</div>
+
+<script>
+
+let stops=[];
+
+const map=L.map('map').setView([45.18,9.15],7);
+
+L.tileLayer(
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+).addTo(map);
+
+let markers=[];
+let routeLine=null;
+
+async function addStop(){
+
+const addr=document.getElementById("address").value;
+
+const url=`https://nominatim.openstreetmap.org/search?format=json&q=${addr}`;
+
+const res=await fetch(url);
+
+const data=await res.json();
+
+if(data.length==0){
+alert("indirizzo non trovato");
+return;
+}
+
+const lat=parseFloat(data[0].lat);
+const lon=parseFloat(data[0].lon);
+
+stops.push({
+name:addr,
+lat:lat,
+lon:lon
+});
+
+draw();
+
+}
+
+function draw(){
+
+markers.forEach(m=>map.removeLayer(m));
+markers=[];
+
+if(routeLine) map.removeLayer(routeLine);
+
+let coords=[];
+
+stops.forEach((s,i)=>{
+
+let m=L.marker([s.lat,s.lon]).addTo(map);
+
+m.bindPopup((i+1)+". "+s.name);
+
+markers.push(m);
+
+coords.push([s.lat,s.lon]);
+
+});
+
+if(coords.length>1){
+
+routeLine=L.polyline(coords,{color:'blue'}).addTo(map);
+
+map.fitBounds(routeLine.getBounds());
+
+}
+
+updateList();
+
+}
+
+function updateList(){
+
+const list=document.getElementById("list");
+
+list.innerHTML="";
+
+stops.forEach((s,i)=>{
+
+let div=document.createElement("div");
+
+div.className="stop";
+
+div.innerHTML=(i+1)+" - "+s.name;
+
+list.appendChild(div);
+
+});
+
+}
+
+async function optimize(){
+
+if(stops.length<3){
+alert("aggiungi almeno 3 tappe");
+return;
+}
+
+const coords=stops.map(s=>s.lon+","+s.lat).join(";");
+
+const url=`https://router.project-osrm.org/trip/v1/driving/${coords}?source=first&destination=last&roundtrip=false`;
+
+const res=await fetch(url);
+
+const data=await res.json();
+
+const order=data.waypoints
+.sort((a,b)=>a.waypoint_index-b.waypoint_index)
+.map(w=>w.trips_index);
+
+stops=order.map(i=>stops[i]);
+
+draw();
+
+}
+
+</script>
+
+</body>
+</html>
