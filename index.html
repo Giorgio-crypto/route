@@ -3,43 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Route Planner Pro</title>
+  <title>Route Planner Pro V3</title>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
     :root{
-      --bg:#0b1220;
-      --panel:#111827;
-      --card:#172033;
-      --card2:#0f172a;
-      --line:#263247;
-      --text:#eef2ff;
-      --muted:#9aa7bd;
+      --bg:#08101c;
+      --panel:#10192b;
+      --card:#132038;
+      --card2:#0d1727;
+      --line:#22314d;
+      --text:#eef4ff;
+      --muted:#9db0cc;
       --primary:#2563eb;
-      --primary-2:#1d4ed8;
+      --primary2:#1d4ed8;
       --ok:#16a34a;
       --warn:#d97706;
       --danger:#dc2626;
-      --chip:#1e293b;
-      --shadow:0 18px 50px rgba(0,0,0,.35);
+      --chip:#1d2a44;
+      --shadow:0 18px 48px rgba(0,0,0,.35);
       --radius:22px;
     }
 
-    *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
-    html,body{ margin:0; padding:0; font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:var(--text); }
-    body{ min-height:100vh; }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+    body{min-height:100vh}
 
     .app{
       display:grid;
-      grid-template-columns: 430px 1fr;
+      grid-template-columns:430px 1fr;
       min-height:100vh;
-      gap:0;
       background:
-        radial-gradient(circle at top left, rgba(37,99,235,.16), transparent 30%),
-        radial-gradient(circle at bottom right, rgba(22,163,74,.10), transparent 20%),
-        linear-gradient(180deg,#08101c,#0b1220);
+        radial-gradient(circle at top left, rgba(37,99,235,.16), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(22,163,74,.10), transparent 18%),
+        linear-gradient(180deg,#07101b,#08101c);
     }
 
     .sidebar{
@@ -48,54 +47,61 @@
       display:flex;
       flex-direction:column;
       gap:14px;
-      background:rgba(8,16,28,.75);
-      backdrop-filter: blur(16px);
-      min-height:100vh;
+      background:rgba(8,16,28,.78);
+      backdrop-filter:blur(14px);
+    }
+
+    .hero,.card{
+      background:linear-gradient(180deg, rgba(19,32,56,.97), rgba(13,23,39,.97));
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:28px;
+      padding:14px;
+      box-shadow:var(--shadow);
     }
 
     .hero{
-      background:linear-gradient(135deg, rgba(37,99,235,.22), rgba(15,23,42,.95));
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:28px;
-      padding:16px;
-      box-shadow:var(--shadow);
+      background:linear-gradient(135deg, rgba(37,99,235,.24), rgba(13,23,39,.98));
     }
 
     .hero-top{
       display:flex;
-      align-items:center;
       justify-content:space-between;
+      align-items:center;
       gap:10px;
       margin-bottom:10px;
     }
 
-    .logo{
+    .brand{
       display:flex;
       align-items:center;
       gap:10px;
       font-weight:700;
-      font-size:20px;
-    }
-
-    .logo-badge{
-      width:42px;
-      height:42px;
-      border-radius:16px;
-      background:linear-gradient(135deg,var(--primary),#60a5fa);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      box-shadow:0 12px 30px rgba(37,99,235,.35);
       font-size:22px;
     }
 
-    .hero h1{
+    .brand-icon{
+      width:44px;height:44px;border-radius:16px;
+      display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(135deg,var(--primary),#60a5fa);
+      box-shadow:0 12px 28px rgba(37,99,235,.36);
       font-size:24px;
-      line-height:1.15;
-      margin:10px 0 6px;
     }
 
-    .hero p{
+    .badge{
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.08);
+      color:#dbeafe;
+      font-size:12px;
+    }
+
+    h1{
+      margin:8px 0 6px;
+      font-size:28px;
+      line-height:1.12;
+    }
+
+    .sub{
       margin:0;
       color:var(--muted);
       line-height:1.45;
@@ -110,15 +116,15 @@
     }
 
     .stat{
-      background:rgba(8,16,28,.85);
+      background:rgba(6,12,22,.78);
       border:1px solid rgba(255,255,255,.06);
       border-radius:18px;
       padding:12px;
     }
 
     .stat .label{
-      font-size:12px;
       color:var(--muted);
+      font-size:12px;
       margin-bottom:6px;
     }
 
@@ -128,40 +134,36 @@
       line-height:1;
     }
 
-    .card{
-      background:linear-gradient(180deg, rgba(23,32,51,.95), rgba(15,23,42,.96));
-      border:1px solid rgba(255,255,255,.06);
-      border-radius:var(--radius);
-      padding:14px;
-      box-shadow:var(--shadow);
-    }
-
     .card-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
       font-size:15px;
       font-weight:700;
-      margin-bottom:10px;
+    }
+
+    .title-left{
       display:flex;
       align-items:center;
       gap:8px;
     }
 
-    .search-wrap{
-      position:relative;
-    }
-
+    .search-wrap{position:relative}
     .search{
       width:100%;
       padding:16px 16px 16px 48px;
       border-radius:18px;
       border:1px solid rgba(255,255,255,.08);
-      background:#0b1325;
+      background:#0b1324;
       color:var(--text);
       outline:none;
       font-size:16px;
     }
 
     .search:focus{
-      border-color:rgba(37,99,235,.7);
+      border-color:rgba(37,99,235,.75);
       box-shadow:0 0 0 4px rgba(37,99,235,.18);
     }
 
@@ -170,38 +172,38 @@
       left:15px;
       top:50%;
       transform:translateY(-50%);
-      opacity:.65;
+      opacity:.7;
       font-size:18px;
     }
 
-    .suggestions{
+    .suggestions,.client-results,.trip-results{
+      display:none;
       margin-top:10px;
       max-height:240px;
       overflow:auto;
       border-radius:18px;
       border:1px solid rgba(255,255,255,.06);
-      background:#0b1325;
-      display:none;
+      background:#0b1324;
     }
 
-    .suggestion{
+    .suggestion,.client-item,.trip-item{
       padding:12px 14px;
       border-bottom:1px solid rgba(255,255,255,.06);
       cursor:pointer;
     }
 
-    .suggestion:last-child{ border-bottom:none; }
-    .suggestion:hover{ background:rgba(255,255,255,.04); }
+    .suggestion:last-child,.client-item:last-child,.trip-item:last-child{border-bottom:none}
+    .suggestion:hover,.client-item:hover,.trip-item:hover{background:rgba(255,255,255,.04)}
 
-    .suggestion .name{
-      font-weight:700;
+    .s-name,.c-name,.t-name{
       font-size:14px;
+      font-weight:700;
       margin-bottom:4px;
     }
 
-    .suggestion .addr{
-      color:var(--muted);
+    .s-addr,.c-addr,.t-meta{
       font-size:12px;
+      color:var(--muted);
       line-height:1.35;
     }
 
@@ -223,26 +225,39 @@
       margin-top:12px;
     }
 
-    .btn{
+    .btn,.mini{
       border:0;
-      border-radius:16px;
-      padding:13px 14px;
-      color:white;
-      font-weight:700;
+      color:#fff;
       cursor:pointer;
-      font-size:14px;
-      transition:transform .08s ease, opacity .2s ease, background .2s ease;
+      font-weight:700;
+      transition:transform .08s ease, opacity .2s ease;
     }
 
-    .btn:active{ transform:scale(.98); }
-    .btn:disabled{ opacity:.5; cursor:not-allowed; }
+    .btn{
+      padding:13px 14px;
+      border-radius:16px;
+      font-size:14px;
+    }
 
-    .btn-primary{ background:linear-gradient(135deg,var(--primary),#3b82f6); }
-    .btn-primary:hover{ background:linear-gradient(135deg,var(--primary-2),#2563eb); }
-    .btn-secondary{ background:#334155; }
-    .btn-ok{ background:linear-gradient(135deg,#15803d,var(--ok)); }
-    .btn-warn{ background:linear-gradient(135deg,#b45309,var(--warn)); }
-    .btn-danger{ background:linear-gradient(135deg,#b91c1c,var(--danger)); }
+    .mini{
+      padding:10px 8px;
+      border-radius:14px;
+      font-size:12px;
+    }
+
+    .btn:active,.mini:active{transform:scale(.98)}
+    .btn:disabled,.mini:disabled{opacity:.5;cursor:not-allowed}
+
+    .btn-primary{background:linear-gradient(135deg,var(--primary),#3b82f6)}
+    .btn-secondary{background:#334155}
+    .btn-ok{background:linear-gradient(135deg,#15803d,var(--ok))}
+    .btn-warn{background:linear-gradient(135deg,#b45309,var(--warn))}
+    .btn-danger{background:linear-gradient(135deg,#b91c1c,var(--danger))}
+    .mini.gray{background:#334155}
+    .mini.blue{background:#2563eb}
+    .mini.red{background:#dc2626}
+    .mini.green{background:#16a34a}
+    .mini.orange{background:#d97706}
 
     .list{
       display:flex;
@@ -260,6 +275,8 @@
       padding:12px;
     }
 
+    .stop.dragging{opacity:.55}
+
     .stop-head{
       display:grid;
       grid-template-columns:42px 1fr;
@@ -268,12 +285,8 @@
     }
 
     .idx{
-      width:42px;
-      height:42px;
-      border-radius:16px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      width:42px;height:42px;border-radius:16px;
+      display:flex;align-items:center;justify-content:center;
       font-weight:700;
       background:linear-gradient(135deg,var(--primary),#60a5fa);
       box-shadow:0 8px 20px rgba(37,99,235,.28);
@@ -311,24 +324,32 @@
 
     .stop-actions{
       display:grid;
-      grid-template-columns:repeat(4,1fr);
+      grid-template-columns:repeat(5,1fr);
       gap:8px;
       margin-top:10px;
     }
 
-    .mini{
-      border:0;
-      border-radius:14px;
-      padding:10px 8px;
-      font-size:12px;
-      font-weight:700;
-      cursor:pointer;
-      color:white;
+    .two-col{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
     }
 
-    .mini.gray{ background:#334155; }
-    .mini.blue{ background:#2563eb; }
-    .mini.red{ background:#dc2626; }
+    .input{
+      width:100%;
+      padding:12px 14px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.08);
+      background:#0b1324;
+      color:var(--text);
+      outline:none;
+      font-size:14px;
+    }
+
+    .input:focus{
+      border-color:rgba(37,99,235,.75);
+      box-shadow:0 0 0 4px rgba(37,99,235,.18);
+    }
 
     .empty{
       border:1px dashed rgba(255,255,255,.14);
@@ -361,10 +382,10 @@
       padding:10px 14px;
       font-size:13px;
       color:var(--muted);
-      backdrop-filter: blur(12px);
+      backdrop-filter:blur(12px);
     }
 
-    .pill b{ color:var(--text); }
+    .pill b{color:var(--text)}
 
     .map-card{
       flex:1;
@@ -398,7 +419,7 @@
       border-radius:22px;
       padding:14px;
       color:var(--text);
-      backdrop-filter: blur(12px);
+      backdrop-filter:blur(12px);
       box-shadow:var(--shadow);
       pointer-events:auto;
     }
@@ -415,6 +436,12 @@
       line-height:1.4;
     }
 
+    .section-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
     .leaflet-popup-content-wrapper,
     .leaflet-popup-tip{
       background:#0f172a;
@@ -422,27 +449,17 @@
     }
 
     @media (max-width: 980px){
-      .app{
-        grid-template-columns:1fr;
-      }
-
+      .app{grid-template-columns:1fr}
       .sidebar{
         min-height:auto;
         border-right:0;
         border-bottom:1px solid var(--line);
       }
-
-      .map-panel{
-        padding-top:0;
-      }
-
-      .map-card, #map{
-        min-height:62vh;
-      }
-
-      .list{
-        max-height:unset;
-      }
+      .map-panel{padding-top:0}
+      .map-card,#map{min-height:62vh}
+      .list{max-height:unset}
+      .section-grid{grid-template-columns:1fr}
+      .stop-actions{grid-template-columns:repeat(3,1fr)}
     }
   </style>
 </head>
@@ -451,17 +468,17 @@
     <aside class="sidebar">
       <section class="hero">
         <div class="hero-top">
-          <div class="logo">
-            <div class="logo-badge">🧭</div>
+          <div class="brand">
+            <div class="brand-icon">🧭</div>
             <div>Route Planner Pro</div>
           </div>
-          <div style="font-size:12px;color:#dbeafe;background:rgba(255,255,255,.07);padding:8px 10px;border-radius:999px;">mobile-first</div>
+          <div class="badge">V3</div>
         </div>
 
-        <h1>La tua mini Maps, ma fatta come serve a te</h1>
-        <p>
-          Cerca aziende o indirizzi, aggiungi tappe, ottimizza il giro, visualizza
-          percorso reale, chilometri e tempi.
+        <h1>Più vicino a una vera app, meno demo</h1>
+        <p class="sub">
+          Ricerca luoghi, rubrica clienti, viaggi salvati, percorso reale, tempi, km
+          e riordino rapido direttamente dal telefono.
         </p>
 
         <div class="stats">
@@ -485,7 +502,9 @@
       </section>
 
       <section class="card">
-        <div class="card-title">🔎 Cerca e aggiungi tappe</div>
+        <div class="card-title">
+          <div class="title-left">🔎 Cerca e aggiungi tappe</div>
+        </div>
 
         <div class="search-wrap">
           <div class="search-icon">🔍</div>
@@ -493,21 +512,57 @@
         </div>
 
         <div id="suggestions" class="suggestions"></div>
-
         <div id="status" class="status">Pronto. Scrivi almeno 3 lettere per cercare.</div>
 
         <div class="actions">
           <button id="btnOptimize" class="btn btn-ok">Ottimizza</button>
           <button id="btnRecalc" class="btn btn-secondary">Ricalcola</button>
-          <button id="btnSave" class="btn btn-warn">Salva</button>
+          <button id="btnSaveCurrentTrip" class="btn btn-warn">Salva viaggio</button>
           <button id="btnReset" class="btn btn-danger">Nuovo</button>
         </div>
       </section>
 
       <section class="card">
-        <div class="card-title">📍 Ordine tappe</div>
+        <div class="card-title">
+          <div class="title-left">📍 Ordine tappe</div>
+        </div>
         <div id="stopList" class="list"></div>
       </section>
+
+      <div class="section-grid">
+        <section class="card">
+          <div class="card-title">
+            <div class="title-left">🏢 Rubrica clienti</div>
+          </div>
+
+          <div class="two-col">
+            <input id="clientName" class="input" placeholder="Nome cliente" />
+            <input id="clientAddress" class="input" placeholder="Indirizzo o luogo" />
+          </div>
+
+          <div class="actions" style="margin-top:10px">
+            <button id="btnAddClientManual" class="btn btn-primary">Aggiungi cliente</button>
+            <button id="btnShowClients" class="btn btn-secondary">Mostra clienti</button>
+          </div>
+
+          <div id="clientResults" class="client-results"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-title">
+            <div class="title-left">🗂️ Viaggi salvati</div>
+          </div>
+
+          <input id="tripName" class="input" placeholder="Nome viaggio es. Giro Milano Martedì" />
+
+          <div class="actions" style="margin-top:10px">
+            <button id="btnSaveNamedTrip" class="btn btn-primary">Salva con nome</button>
+            <button id="btnShowTrips" class="btn btn-secondary">Mostra viaggi</button>
+          </div>
+
+          <div id="tripResults" class="trip-results"></div>
+        </section>
+      </div>
     </aside>
 
     <main class="map-panel">
@@ -515,6 +570,8 @@
         <div class="pill">Percorso: <b id="pillMode">manuale</b></div>
         <div class="pill">Km: <b id="pillKm">0.0</b></div>
         <div class="pill">Tempo: <b id="pillTime">0h 00m</b></div>
+        <div class="pill">Clienti: <b id="pillClients">0</b></div>
+        <div class="pill">Viaggi: <b id="pillTrips">0</b></div>
       </div>
 
       <section class="map-card">
@@ -524,8 +581,8 @@
           <div class="bottom-info">
             <div class="line1">Planner viaggi evoluto</div>
             <div class="line2">
-              Aggiungi tappe, seleziona il risultato corretto, lascia che l'app ricalcoli
-              il tracciato stradale reale e poi ottimizza il giro.
+              Seleziona il risultato corretto, aggiungi le tappe, salva il viaggio,
+              costruisci la rubrica clienti e riordina tutto anche con drag & drop.
             </div>
           </div>
         </div>
@@ -534,7 +591,9 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "route_planner_pro_v2";
+    const STORAGE_STATE = "route_planner_state_v3";
+    const STORAGE_CLIENTS = "route_planner_clients_v3";
+    const STORAGE_TRIPS = "route_planner_trips_v3";
 
     const state = {
       stops: [],
@@ -544,6 +603,9 @@
       routeGeo: null
     };
 
+    let clients = [];
+    let trips = [];
+
     const els = {
       searchInput: document.getElementById("searchInput"),
       suggestions: document.getElementById("suggestions"),
@@ -551,7 +613,7 @@
       stopList: document.getElementById("stopList"),
       btnOptimize: document.getElementById("btnOptimize"),
       btnRecalc: document.getElementById("btnRecalc"),
-      btnSave: document.getElementById("btnSave"),
+      btnSaveCurrentTrip: document.getElementById("btnSaveCurrentTrip"),
       btnReset: document.getElementById("btnReset"),
       statStops: document.getElementById("statStops"),
       statKm: document.getElementById("statKm"),
@@ -559,7 +621,20 @@
       statMode: document.getElementById("statMode"),
       pillMode: document.getElementById("pillMode"),
       pillKm: document.getElementById("pillKm"),
-      pillTime: document.getElementById("pillTime")
+      pillTime: document.getElementById("pillTime"),
+      pillClients: document.getElementById("pillClients"),
+      pillTrips: document.getElementById("pillTrips"),
+
+      clientName: document.getElementById("clientName"),
+      clientAddress: document.getElementById("clientAddress"),
+      btnAddClientManual: document.getElementById("btnAddClientManual"),
+      btnShowClients: document.getElementById("btnShowClients"),
+      clientResults: document.getElementById("clientResults"),
+
+      tripName: document.getElementById("tripName"),
+      btnSaveNamedTrip: document.getElementById("btnSaveNamedTrip"),
+      btnShowTrips: document.getElementById("btnShowTrips"),
+      tripResults: document.getElementById("tripResults")
     };
 
     function formatMinutes(min){
@@ -578,6 +653,10 @@
       }[s]));
     }
 
+    function uid(){
+      return (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()));
+    }
+
     function setStatus(msg, ok=true){
       els.status.textContent = msg;
       els.status.style.background = ok ? "rgba(22,163,74,.12)" : "rgba(220,38,38,.12)";
@@ -585,21 +664,34 @@
       els.status.style.color = ok ? "#d1fae5" : "#fecaca";
     }
 
-    function saveState(){
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    function saveAll(){
+      localStorage.setItem(STORAGE_STATE, JSON.stringify(state));
+      localStorage.setItem(STORAGE_CLIENTS, JSON.stringify(clients));
+      localStorage.setItem(STORAGE_TRIPS, JSON.stringify(trips));
     }
 
-    function loadState(){
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(!raw) return;
+    function loadAll(){
       try{
-        const parsed = JSON.parse(raw);
-        if(Array.isArray(parsed.stops)) state.stops = parsed.stops;
-        if(parsed.routeMode) state.routeMode = parsed.routeMode;
-        if(typeof parsed.totalKm === "number") state.totalKm = parsed.totalKm;
-        if(typeof parsed.totalMin === "number") state.totalMin = parsed.totalMin;
-        if(parsed.routeGeo) state.routeGeo = parsed.routeGeo;
+        const rawState = localStorage.getItem(STORAGE_STATE);
+        if(rawState){
+          const parsed = JSON.parse(rawState);
+          if(Array.isArray(parsed.stops)) state.stops = parsed.stops;
+          if(parsed.routeMode) state.routeMode = parsed.routeMode;
+          if(typeof parsed.totalKm === "number") state.totalKm = parsed.totalKm;
+          if(typeof parsed.totalMin === "number") state.totalMin = parsed.totalMin;
+          if(parsed.routeGeo) state.routeGeo = parsed.routeGeo;
+        }
       }catch(e){}
+
+      try{
+        const rawClients = localStorage.getItem(STORAGE_CLIENTS);
+        if(rawClients) clients = JSON.parse(rawClients) || [];
+      }catch(e){ clients = []; }
+
+      try{
+        const rawTrips = localStorage.getItem(STORAGE_TRIPS);
+        if(rawTrips) trips = JSON.parse(rawTrips) || [];
+      }catch(e){ trips = []; }
     }
 
     const map = L.map("map", { zoomControl:true }).setView([45.1847, 9.1582], 8);
@@ -612,6 +704,7 @@
     const markersLayer = L.layerGroup().addTo(map);
     let routeLayer = null;
     let searchTimer = null;
+    let dragIndex = null;
 
     function updateSummary(){
       els.statStops.textContent = state.stops.length;
@@ -621,6 +714,8 @@
       els.pillMode.textContent = state.routeMode;
       els.pillKm.textContent = state.totalKm.toFixed(1);
       els.pillTime.textContent = formatMinutes(state.totalMin);
+      els.pillClients.textContent = clients.length;
+      els.pillTrips.textContent = trips.length;
     }
 
     function renderStops(){
@@ -637,6 +732,9 @@
 
         const div = document.createElement("div");
         div.className = "stop";
+        div.draggable = true;
+        div.dataset.index = index;
+
         div.innerHTML = `
           <div class="stop-head">
             <div class="idx">${index + 1}</div>
@@ -657,6 +755,7 @@
             <button class="mini gray" data-action="up" data-index="${index}">Su</button>
             <button class="mini gray" data-action="down" data-index="${index}">Giù</button>
             <button class="mini blue" data-action="nav" data-index="${index}">Naviga</button>
+            <button class="mini green" data-action="saveclient" data-index="${index}">Cliente</button>
             <button class="mini red" data-action="del" data-index="${index}">Elimina</button>
           </div>
         `;
@@ -691,11 +790,56 @@
       }
     }
 
+    function renderClients(){
+      els.clientResults.innerHTML = "";
+
+      if(!clients.length){
+        els.clientResults.innerHTML = `<div class="client-item"><div class="c-name">Nessun cliente salvato</div><div class="c-addr">Aggiungi un cliente manualmente o da una tappa.</div></div>`;
+      } else {
+        els.clientResults.innerHTML = clients.map((c, i) => `
+          <div class="client-item" data-index="${i}">
+            <div class="c-name">${escapeHtml(c.name)}</div>
+            <div class="c-addr">${escapeHtml(c.address)}</div>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <button class="mini blue" data-client-action="addstop" data-index="${i}">Usa</button>
+              <button class="mini red" data-client-action="delete" data-index="${i}">Elimina</button>
+            </div>
+          </div>
+        `).join("");
+      }
+
+      els.clientResults.style.display = "block";
+    }
+
+    function renderTrips(){
+      els.tripResults.innerHTML = "";
+
+      if(!trips.length){
+        els.tripResults.innerHTML = `<div class="trip-item"><div class="t-name">Nessun viaggio salvato</div><div class="t-meta">Salva il viaggio corrente con un nome.</div></div>`;
+      } else {
+        els.tripResults.innerHTML = trips.map((t, i) => `
+          <div class="trip-item" data-index="${i}">
+            <div class="t-name">${escapeHtml(t.name)}</div>
+            <div class="t-meta">${t.stops.length} tappe · ${t.totalKm.toFixed(1)} km · ${formatMinutes(t.totalMin)}</div>
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+              <button class="mini blue" data-trip-action="load" data-index="${i}">Apri</button>
+              <button class="mini orange" data-trip-action="duplicate" data-index="${i}">Duplica</button>
+              <button class="mini red" data-trip-action="delete" data-index="${i}">Elimina</button>
+            </div>
+          </div>
+        `).join("");
+      }
+
+      els.tripResults.style.display = "block";
+    }
+
     function renderAll(){
       updateSummary();
       renderStops();
       renderMap();
-      saveState();
+      renderClients();
+      renderTrips();
+      saveAll();
     }
 
     async function searchSuggestions(query){
@@ -728,8 +872,8 @@
           const name = (item.display_name || "Risultato").split(",")[0];
           return `
             <div class="suggestion" data-lat="${item.lat}" data-lon="${item.lon}" data-name="${escapeHtml(name)}" data-address="${escapeHtml(item.display_name)}">
-              <div class="name">${escapeHtml(name)}</div>
-              <div class="addr">${escapeHtml(item.display_name)}</div>
+              <div class="s-name">${escapeHtml(name)}</div>
+              <div class="s-addr">${escapeHtml(item.display_name)}</div>
             </div>
           `;
         }).join("");
@@ -743,7 +887,7 @@
 
     async function addStop(name, address, lat, lon){
       const stop = {
-        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
+        id: uid(),
         name,
         address,
         lat: Number(lat),
@@ -827,11 +971,6 @@
       }
     }
 
-    function saveTrip(){
-      saveState();
-      setStatus("Viaggio salvato sul telefono.");
-    }
-
     function resetTrip(){
       if(!confirm("Vuoi cancellare il viaggio attuale?")) return;
       state.stops = [];
@@ -848,6 +987,166 @@
       window.open(url, "_blank");
     }
 
+    function addClientManual(){
+      const name = els.clientName.value.trim();
+      const address = els.clientAddress.value.trim();
+
+      if(!name || !address){
+        setStatus("Inserisci nome cliente e indirizzo.", false);
+        return;
+      }
+
+      clients.unshift({
+        id: uid(),
+        name,
+        address
+      });
+
+      els.clientName.value = "";
+      els.clientAddress.value = "";
+      renderAll();
+      setStatus("Cliente salvato in rubrica.");
+    }
+
+    function saveStopAsClient(index){
+      const stop = state.stops[index];
+      if(!stop) return;
+
+      const exists = clients.some(c => c.name === stop.name && c.address === stop.address);
+      if(exists){
+        setStatus("Cliente già presente in rubrica.", false);
+        return;
+      }
+
+      clients.unshift({
+        id: uid(),
+        name: stop.name,
+        address: stop.address
+      });
+
+      renderAll();
+      setStatus("Tappa salvata in rubrica clienti.");
+    }
+
+    async function addClientToStops(index){
+      const client = clients[index];
+      if(!client) return;
+
+      try{
+        setStatus("Geocodifica cliente...");
+        const url = new URL("https://nominatim.openstreetmap.org/search");
+        url.searchParams.set("q", client.address);
+        url.searchParams.set("format", "jsonv2");
+        url.searchParams.set("limit", "1");
+
+        const res = await fetch(url.toString(), { headers:{ "Accept":"application/json" } });
+        const data = await res.json();
+
+        if(!data.length){
+          setStatus("Indirizzo cliente non trovato.", false);
+          return;
+        }
+
+        await addStop(client.name, client.address, data[0].lat, data[0].lon);
+        setStatus("Cliente aggiunto come tappa.");
+      }catch(e){
+        setStatus("Errore aggiunta cliente.", false);
+      }
+    }
+
+    function deleteClient(index){
+      if(index < 0 || index >= clients.length) return;
+      clients.splice(index, 1);
+      renderAll();
+      setStatus("Cliente eliminato.");
+    }
+
+    function saveNamedTrip(){
+      const name = els.tripName.value.trim();
+      if(!name){
+        setStatus("Inserisci un nome viaggio.", false);
+        return;
+      }
+      if(!state.stops.length){
+        setStatus("Non ci sono tappe da salvare.", false);
+        return;
+      }
+
+      const trip = {
+        id: uid(),
+        name,
+        savedAt: new Date().toISOString(),
+        stops: JSON.parse(JSON.stringify(state.stops)),
+        routeMode: state.routeMode,
+        totalKm: state.totalKm,
+        totalMin: state.totalMin,
+        routeGeo: state.routeGeo
+      };
+
+      trips.unshift(trip);
+      els.tripName.value = "";
+      renderAll();
+      setStatus("Viaggio salvato.");
+    }
+
+    function saveCurrentTripQuick(){
+      const autoName = `Viaggio ${new Date().toLocaleString("it-IT")}`;
+      if(!state.stops.length){
+        setStatus("Non ci sono tappe da salvare.", false);
+        return;
+      }
+
+      trips.unshift({
+        id: uid(),
+        name: autoName,
+        savedAt: new Date().toISOString(),
+        stops: JSON.parse(JSON.stringify(state.stops)),
+        routeMode: state.routeMode,
+        totalKm: state.totalKm,
+        totalMin: state.totalMin,
+        routeGeo: state.routeGeo
+      });
+
+      renderAll();
+      setStatus("Viaggio salvato rapidamente.");
+    }
+
+    function loadTrip(index){
+      const trip = trips[index];
+      if(!trip) return;
+
+      state.stops = JSON.parse(JSON.stringify(trip.stops));
+      state.routeMode = trip.routeMode || "manuale";
+      state.totalKm = trip.totalKm || 0;
+      state.totalMin = trip.totalMin || 0;
+      state.routeGeo = trip.routeGeo || null;
+
+      renderAll();
+      setStatus("Viaggio caricato.");
+    }
+
+    function duplicateTrip(index){
+      const trip = trips[index];
+      if(!trip) return;
+
+      trips.unshift({
+        ...JSON.parse(JSON.stringify(trip)),
+        id: uid(),
+        name: trip.name + " copia",
+        savedAt: new Date().toISOString()
+      });
+
+      renderAll();
+      setStatus("Viaggio duplicato.");
+    }
+
+    function deleteTrip(index){
+      if(index < 0 || index >= trips.length) return;
+      trips.splice(index, 1);
+      renderAll();
+      setStatus("Viaggio eliminato.");
+    }
+
     els.searchInput.addEventListener("input", () => {
       clearTimeout(searchTimer);
       const q = els.searchInput.value;
@@ -858,9 +1157,7 @@
       if(e.key === "Enter"){
         e.preventDefault();
         const first = els.suggestions.querySelector(".suggestion");
-        if(first){
-          first.click();
-        }
+        if(first) first.click();
       }
     });
 
@@ -877,14 +1174,47 @@
 
     els.btnOptimize.addEventListener("click", optimizeRoute);
     els.btnRecalc.addEventListener("click", calculateRoute);
-    els.btnSave.addEventListener("click", saveTrip);
+    els.btnSaveCurrentTrip.addEventListener("click", saveCurrentTripQuick);
     els.btnReset.addEventListener("click", resetTrip);
+
+    els.btnAddClientManual.addEventListener("click", addClientManual);
+    els.btnShowClients.addEventListener("click", () => {
+      els.clientResults.style.display = els.clientResults.style.display === "block" ? "none" : "block";
+      if(els.clientResults.style.display === "block") renderClients();
+    });
+
+    els.btnSaveNamedTrip.addEventListener("click", saveNamedTrip);
+    els.btnShowTrips.addEventListener("click", () => {
+      els.tripResults.style.display = els.tripResults.style.display === "block" ? "none" : "block";
+      if(els.tripResults.style.display === "block") renderTrips();
+    });
+
+    els.clientResults.addEventListener("click", async (e) => {
+      const btn = e.target.closest("button");
+      if(!btn) return;
+      const index = Number(btn.dataset.index);
+      const action = btn.dataset.clientAction;
+
+      if(action === "addstop") await addClientToStops(index);
+      if(action === "delete") deleteClient(index);
+    });
+
+    els.tripResults.addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if(!btn) return;
+      const index = Number(btn.dataset.index);
+      const action = btn.dataset.tripAction;
+
+      if(action === "load") loadTrip(index);
+      if(action === "duplicate") duplicateTrip(index);
+      if(action === "delete") deleteTrip(index);
+    });
 
     els.stopList.addEventListener("click", async (e) => {
       const btn = e.target.closest("button");
       if(!btn) return;
 
-      indice costiero = numero (btn.dataset.index);)const index = Number(btn.dataset.index);
+      const index = Number(btn.dataset.index);
       const action = btn.dataset.action;
 
       if(Number.isNaN(index) || !state.stops[index]) return;
@@ -910,14 +1240,51 @@
       if(action === "nav"){
         openNavigation(state.stops[index]);
       }
+
+      if(action === "saveclient"){
+        saveStopAsClient(index);
+      }
     });
 
-    loadState();
-    renderAll();
-    if(state.stops.length >= 2){
-      calculateRoute();
-    } else {
-      setStatus("Pronto. Scrivi almeno 3 lettere per cercare.");
+    els.stopList.addEventListener("dragstart", (e) => {
+      const stop = e.target.closest(".stop");
+      if(!stop) return;
+      dragIndex = Number(stop.dataset.index);
+      stop.classList.add("dragging");
+    });
+
+    els.stopList.addEventListener("dragend", (e) => {
+       const stop = e.target.closest(".stop");
+      if(stop) stop.classList.remove("dragging");
+    });
+
+    els.stopList.addEventListener("dragover", (e) => {
+       prevenire l'inadempimento .prevenire il default();
+    });
+
+     Els .addEventListenerstopListdelle fermate.Aggiungi Ascoltatore Eventi("drop" , async (e) => {}
+       Status diSet . ...'inadempimento ();
+      Const bersaglio = e.bersaglio .più vicino(".stop");
+      se(!bersaglio || indice di trascinamento === null) return;
+
+      Const indice di caduta = Number(target.dataset.index);
+      if(Number.isNaN(indice di caduta) || dragIndex === dropIndex) return;
+
+      const Trasferimento = state.stops.splice(dragIndex, 1)[0];
+      state.stops.splice(indice di caduta , 0Modalità percorso, mosso;
+       Indice di trascinamento = di trascinamentonullo;
+      state .Mode di rotta = "manuale";
+      Aspettate Calcolo del percorso();
+      Status di set("Ordine aggiornato con drag & drop.");
+    });
+
+    carica tutto();
+    Resa di tutti i();
+
+    se(Stato.Fermata .lunghezza >= 2){
+      Calcolo del percorso();
+    } altro {
+      Status di set("Pronto. Scrivi almeno 3 lettere per cercare.");
     }
   </script>
 </body>
