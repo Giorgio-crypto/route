@@ -1,24 +1,918 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Test JS</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Route Planner Pro V3 Stabile</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <style>
-    body{font-family:Arial,sans-serif;background:#111;color:#fff;padding:20px}
-    button{padding:14px 18px;font-size:18px;border:0;border-radius:12px;background:#2563eb;color:#fff}
-    #out{margin-top:20px;padding:14px;background:#222;border-radius:12px}
+    :root{
+      --bg:#08101c;
+      --panel:#10192b;
+      --card:#132038;
+      --line:#22314d;
+      --text:#eef4ff;
+      --muted:#9db0cc;
+      --primary:#2563eb;
+      --ok:#16a34a;
+      --warn:#d97706;
+      --danger:#dc2626;
+      --chip:#1d2a44;
+      --shadow:0 18px 48px rgba(0,0,0,.35);
+    }
+
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{
+      margin:0;
+      padding:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:Arial,Helvetica,sans-serif;
+    }
+
+    body{min-height:100vh}
+
+    .app{
+      display:grid;
+      grid-template-columns:420px 1fr;
+      min-height:100vh;
+      background:
+        radial-gradient(circle at top left, rgba(37,99,235,.16), transparent 28%),
+        linear-gradient(180deg,#07101b,#08101c);
+    }
+
+    .sidebar{
+      border-right:1px solid var(--line);
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      background:rgba(8,16,28,.82);
+      backdrop-filter:blur(12px);
+    }
+
+    .card{
+      background:linear-gradient(180deg, rgba(19,32,56,.97), rgba(13,23,39,.97));
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:24px;
+      padding:14px;
+      box-shadow:var(--shadow);
+    }
+
+    .hero{
+      background:linear-gradient(135deg, rgba(37,99,235,.24), rgba(13,23,39,.98));
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:700;
+      font-size:22px;
+      margin-bottom:10px;
+    }
+
+    .brand-icon{
+      width:44px;height:44px;border-radius:16px;
+      display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(135deg,var(--primary),#60a5fa);
+      box-shadow:0 12px 28px rgba(37,99,235,.36);
+      font-size:24px;
+    }
+
+    h1{
+      margin:8px 0 6px;
+      font-size:28px;
+      line-height:1.12;
+    }
+
+    .sub{
+      margin:0;
+      color:var(--muted);
+      line-height:1.45;
+      font-size:14px;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .stat{
+      background:rgba(6,12,22,.78);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:18px;
+      padding:12px;
+    }
+
+    .stat .label{
+      color:var(--muted);
+      font-size:12px;
+      margin-bottom:6px;
+    }
+
+    .stat .value{
+      font-size:22px;
+      font-weight:700;
+      line-height:1;
+    }
+
+    .card-title{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:10px;
+      font-size:15px;
+      font-weight:700;
+    }
+
+    .search-wrap{
+      position:relative;
+    }
+
+    .search{
+      width:100%;
+      padding:16px 16px 16px 48px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.08);
+      background:#0b1324;
+      color:var(--text);
+      outline:none;
+      font-size:16px;
+    }
+
+    .search:focus{
+      border-color:rgba(37,99,235,.75);
+      box-shadow:0 0 0 4px rgba(37,99,235,.18);
+    }
+
+    .search-icon{
+      position:absolute;
+      left:15px;
+      top:50%;
+      transform:translateY(-50%);
+      opacity:.7;
+      font-size:18px;
+    }
+
+    .actions{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .btn,.mini{
+      border:0;
+      color:#fff;
+      cursor:pointer;
+      font-weight:700;
+      transition:transform .08s ease, opacity .2s ease;
+    }
+
+    .btn{
+      padding:13px 14px;
+      border-radius:16px;
+      font-size:14px;
+    }
+
+    .mini{
+      padding:10px 8px;
+      border-radius:14px;
+      font-size:12px;
+    }
+
+    .btn:active,.mini:active{transform:scale(.98)}
+    .btn:disabled,.mini:disabled{opacity:.5;cursor:not-allowed}
+
+    .btn-primary{background:linear-gradient(135deg,var(--primary),#3b82f6)}
+    .btn-secondary{background:#334155}
+    .btn-ok{background:linear-gradient(135deg,#15803d,var(--ok))}
+    .btn-warn{background:linear-gradient(135deg,#b45309,var(--warn))}
+    .btn-danger{background:linear-gradient(135deg,#b91c1c,var(--danger))}
+    .mini.gray{background:#334155}
+    .mini.blue{background:#2563eb}
+    .mini.red{background:#dc2626}
+
+    .status{
+      margin-top:12px;
+      background:rgba(22,163,74,.12);
+      border:1px solid rgba(22,163,74,.25);
+      color:#d1fae5;
+      padding:12px 14px;
+      border-radius:16px;
+      font-size:13px;
+      line-height:1.4;
+    }
+
+    .results{
+      display:none;
+      margin-top:10px;
+      max-height:240px;
+      overflow:auto;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.06);
+      background:#0b1324;
+    }
+
+    .result{
+      padding:12px 14px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      cursor:pointer;
+    }
+
+    .result:last-child{border-bottom:none}
+    .result:hover{background:rgba(255,255,255,.04)}
+
+    .r-name{
+      font-size:14px;
+      font-weight:700;
+      margin-bottom:4px;
+    }
+
+    .r-addr{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      max-height:46vh;
+      overflow:auto;
+      padding-right:2px;
+    }
+
+    .stop{
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:18px;
+      padding:12px;
+    }
+
+    .stop-head{
+      display:grid;
+      grid-template-columns:42px 1fr;
+      gap:10px;
+      align-items:start;
+    }
+
+    .idx{
+      width:42px;height:42px;border-radius:16px;
+      display:flex;align-items:center;justify-content:center;
+      font-weight:700;
+      background:linear-gradient(135deg,var(--primary),#60a5fa);
+      box-shadow:0 8px 20px rgba(37,99,235,.28);
+    }
+
+    .stop-name{
+      font-weight:700;
+      line-height:1.25;
+      font-size:15px;
+      margin-bottom:5px;
+    }
+
+    .stop-addr{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.35;
+    }
+
+    .chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .chip{
+      background:var(--chip);
+      border:1px solid rgba(255,255,255,.06);
+      color:#dbeafe;
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .stop-actions{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .empty{
+      border:1px dashed rgba(255,255,255,.14);
+      border-radius:18px;
+      padding:22px 14px;
+      text-align:center;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .map-panel{
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      min-width:0;
+    }
+
+    .top-floating{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .pill{
+      background:rgba(8,16,28,.82);
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:999px;
+      padding:10px 14px;
+      font-size:13px;
+      color:var(--muted);
+      backdrop-filter:blur(12px);
+    }
+
+    .pill b{color:var(--text)}
+
+    .map-card{
+      flex:1;
+      min-height:78vh;
+      border-radius:30px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow:var(--shadow);
+      background:#0b1325;
+      position:relative;
+    }
+
+    #map{
+      width:100%;
+      height:100%;
+      min-height:78vh;
+    }
+
+    .map-overlay{
+      position:absolute;
+      left:14px;
+      right:14px;
+      bottom:14px;
+      z-index:500;
+      pointer-events:none;
+    }
+
+    .bottom-info{
+      background:rgba(8,16,28,.82);
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:22px;
+      padding:14px;
+      color:var(--text);
+      backdrop-filter:blur(12px);
+      box-shadow:var(--shadow);
+      pointer-events:auto;
+    }
+
+    .bottom-info .line1{
+      font-weight:700;
+      margin-bottom:6px;
+      font-size:15px;
+    }
+
+    .bottom-info .line2{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.4;
+    }
+
+    .leaflet-popup-content-wrapper,
+    .leaflet-popup-tip{
+      background:#0f172a;
+      color:#e5e7eb;
+    }
+
+    @media (max-width: 980px){
+      .app{grid-template-columns:1fr}
+      .sidebar{
+        min-height:auto;
+        border-right:0;
+        border-bottom:1px solid var(--line);
+      }
+      .map-panel{padding-top:0}
+      .map-card,#map{min-height:62vh}
+      .list{max-height:unset}
+      .stop-actions{grid-template-columns:repeat(2,1fr)}
+    }
   </style>
 </head>
 <body>
-  <h1>Test JavaScript</h1>
-  <button onclick="prova()">Premi qui</button>
-  <div id="out">Se il bottone funziona, qui compare il messaggio.</div>
+  <div class="app">
+    <aside class="sidebar">
+      <section class="card hero">
+        <div class="brand">
+          <div class="brand-icon">🧭</div>
+          <div>Route Planner Pro</div>
+        </div>
+
+        <h1>Versione stabile</h1>
+        <p class="sub">
+          Prima rimettiamo in piedi bene ricerca, tappe, percorso, km e tempi.
+          Poi sopra ci rimettiamo rubrica clienti e viaggi salvati.
+        </p>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="label">Tappe</div>
+            <div class="value" id="statStops">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">Totale km</div>
+            <div class="value" id="statKm">0.0</div>
+          </div>
+          <div class="stat">
+            <div class="label">Tempo totale</div>
+            <div class="value" id="statTime">0h 00m</div>
+          </div>
+          <div class="stat">
+            <div class="label">Stato</div>
+            <div class="value" id="statMode" style="font-size:16px;">Pronto</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-title">🔎 Cerca luoghi</div>
+
+        <div class="search-wrap">
+          <div class="search-icon">🔍</div>
+          <input id="searchInput" class="search" placeholder="Es. Via Roma 1 Milano oppure IKEA Corsico" />
+        </div>
+
+        <div class="actions">
+          <button id="btnSearch" class="btn btn-primary">Cerca</button>
+          <button id="btnClearResults" class="btn btn-secondary">Pulisci</button>
+        </div>
+
+        <div id="results" class="results"></div>
+        <div id="status" class="status">Pronto. Scrivi e premi Cerca.</div>
+      </section>
+
+      <section class="card">
+        <div class="card-title">📍 Tappe del viaggio</div>
+
+        <div class="actions" style="margin-top:0">
+          <button id="btnOptimize" class="btn btn-ok">Ottimizza</button>
+          <button id="btnRecalc" class="btn btn-secondary">Ricalcola</button>
+          <button id="btnSave" class="btn btn-warn">Salva</button>
+          <button id="btnReset" class="btn btn-danger">Nuovo</button>
+        </div>
+
+        <div id="stopList" class="list" style="margin-top:12px"></div>
+      </section>
+    </aside>
+
+    <main class="map-panel">
+      <div class="top-floating">
+        <div class="pill">Percorso: <b id="pillMode">manuale</b></div>
+        <div class="pill">Km: <b id="pillKm">0.0</b></div>
+        <div class="pill">Tempo: <b id="pillTime">0h 00m</b></div>
+      </div>
+
+      <section class="map-card">
+        <div id="map"></div>
+
+        <div class="map-overlay">
+          <div class="bottom-info">
+            <div class="line1">Base stabile</div>
+            <div class="line2">
+              Cerca, aggiungi, visualizza il tracciato stradale, controlla km e tempi,
+              ottimizza l’ordine e apri una tappa in Google Maps.
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
 
   <script>
-    function prova(){
-      document.getElementById('out').textContent = 'FUNZIONA';
-      alert('JavaScript OK');
+    const STORAGE_KEY = "route_planner_v3_stable";
+
+    const state = {
+      stops: [],
+      routeMode: "manuale",
+      totalKm: 0,
+      totalMin: 0,
+      routeGeo: null
+    };
+
+    const els = {
+      searchInput: document.getElementById("searchInput"),
+      btnSearch: document.getElementById("btnSearch"),
+      btnClearResults: document.getElementById("btnClearResults"),
+      results: document.getElementById("results"),
+      status: document.getElementById("status"),
+      stopList: document.getElementById("stopList"),
+      btnOptimize: document.getElementById("btnOptimize"),
+      btnRecalc: document.getElementById("btnRecalc"),
+      btnSave: document.getElementById("btnSave"),
+      btnReset: document.getElementById("btnReset"),
+      statStops: document.getElementById("statStops"),
+      statKm: document.getElementById("statKm"),
+      statTime: document.getElementById("statTime"),
+      statMode: document.getElementById("statMode"),
+      pillMode: document.getElementById("pillMode"),
+      pillKm: document.getElementById("pillKm"),
+      pillTime: document.getElementById("pillTime")
+    };
+
+    function uid(){
+      return crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random());
+    }
+
+    function escapeHtml(str){
+      return String(str).replace(/[&<>"']/g, s => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        "\"":"&quot;",
+        "'":"&#039;"
+      }[s]));
+    }
+
+    function formatMinutes(min){
+      const h = Math.floor(min / 60);
+      const m = Math.round(min % 60);
+      return `${h}h ${String(m).padStart(2,"0")}m`;
+    }
+
+    function setStatus(msg, ok=true){
+      els.status.textContent = msg;
+      els.status.style.background = ok ? "rgba(22,163,74,.12)" : "rgba(220,38,38,.12)";
+      els.status.style.borderColor = ok ? "rgba(22,163,74,.25)" : "rgba(220,38,38,.25)";
+      els.status.style.color = ok ? "#d1fae5" : "#fecaca";
+    }
+
+    function saveState(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function loadState(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(!raw) return;
+        const parsed = JSON.parse(raw);
+        if(Array.isArray(parsed.stops)) state.stops = parsed.stops;
+        if(parsed.routeMode) state.routeMode = parsed.routeMode;
+        if(typeof parsed.totalKm === "number") state.totalKm = parsed.totalKm;
+        if(typeof parsed.totalMin === "number") state.totalMin = parsed.totalMin;
+        if(parsed.routeGeo) state.routeGeo = parsed.routeGeo;
+      }catch(e){}
+    }
+
+    const map = L.map("map", { zoomControl:true }).setView([45.1847, 9.1582], 8);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap contributors"
+    }).addTo(map);
+
+    const markersLayer = L.layerGroup().addTo(map);
+    let routeLayer = null;
+
+    function updateSummary(){
+      els.statStops.textContent = state.stops.length;
+      els.statKm.textContent = state.totalKm.toFixed(1);
+      els.statTime.textContent = formatMinutes(state.totalMin);
+      els.statMode.textContent = state.routeMode;
+      els.pillMode.textContent = state.routeMode;
+      els.pillKm.textContent = state.totalKm.toFixed(1);
+      els.pillTime.textContent = formatMinutes(state.totalMin);
+    }
+
+    function renderStops(){
+      els.stopList.innerHTML = "";
+
+      if(!state.stops.length){
+        els.stopList.innerHTML = `<div class="empty">Nessuna tappa ancora.<br>Cerca un indirizzo o il nome di un’azienda e aggiungilo al viaggio.</div>`;
+        return;
+      }
+
+      state.stops.forEach((stop, index) => {
+        const legKm = typeof stop.legKm === "number" ? stop.legKm.toFixed(1) : null;
+        const legMin = typeof stop.legMin === "number" ? formatMinutes(stop.legMin) : null;
+
+        const div = document.createElement("div");
+        div.className = "stop";
+        div.innerHTML = `
+          <div class="stop-head">
+            <div class="idx">${index + 1}</div>
+            <div>
+              <div class="stop-name">${escapeHtml(stop.name)}</div>
+              <div class="stop-addr">${escapeHtml(stop.address)}</div>
+            </div>
+          </div>
+
+          <div class="chips">
+            ${index < state.stops.length - 1 && legKm ? `<div class="chip">${legKm} km</div>` : ""}
+            ${index < state.stops.length - 1 && legMin ? `<div class="chip">${legMin}</div>` : ""}
+            ${index === 0 ? `<div class="chip">Partenza</div>` : ""}
+            ${index === state.stops.length - 1 ? `<div class="chip">Arrivo</div>` : ""}
+          </div>
+
+          <div class="stop-actions">
+            <button class="mini gray" data-action="up" data-index="${index}">Su</button>
+            <button class="mini gray" data-action="down" data-index="${index}">Giù</button>
+            <button class="mini blue" data-action="nav" data-index="${index}">Naviga</button>
+            <button class="mini red" data-action="del" data-index="${index}">Elimina</button>
+          </div>
+        `;
+        els.stopList.appendChild(div);
+      });
+    }
+
+    function renderMap(){
+      markersLayer.clearLayers();
+
+      state.stops.forEach((stop, index) => {
+        const marker = L.marker([stop.lat, stop.lon]).addTo(markersLayer);
+        marker.bindPopup(`<b>${index + 1}. ${escapeHtml(stop.name)}</b><br>${escapeHtml(stop.address)}`);
+      });
+
+      if(routeLayer){
+        map.removeLayer(routeLayer);
+        routeLayer = null;
+      }
+
+      if(state.routeGeo){
+        routeLayer = L.geoJSON(
+          { type:"Feature", geometry: state.routeGeo, properties:{} },
+          { style: { color:"#2563eb", weight:6, opacity:.95 } }
+        ).addTo(map);
+
+        try{
+          map.fitBounds(routeLayer.getBounds(), { padding:[24,24] });
+        }catch(e){}
+      } else if(state.stops.length){
+        const bounds = L.latLngBounds(state.stops.map(s => [s.lat, s.lon]));
+        if(bounds.isValid()) map.fitBounds(bounds, { padding:[24,24] });
+      }
+    }
+
+    function renderAll(){
+      updateSummary();
+      renderStops();
+      renderMap();
+      saveState();
+    }
+
+    function clearResults(){
+      els.results.style.display = "none";
+      els.results.innerHTML = "";
+    }
+
+    function showResults(results){
+      if(!results.length){
+        clearResults();
+        setStatus("Nessun risultato trovato. Prova con un indirizzo più completo.", false);
+        return;
+      }
+
+      els.results.innerHTML = results.map(item => `
+        <div class="result"
+             data-name="${escapeHtml(item.name)}"
+             data-address="${escapeHtml(item.address)}"
+             data-lat="${item.lat}"
+             data-lon="${item.lon}">
+          <div class="r-name">${escapeHtml(item.name)}</div>
+          <div class="r-addr">${escapeHtml(item.address)}</div>
+        </div>
+      `).join("");
+
+      els.results.style.display = "block";
+      setStatus("Tocca il risultato corretto per aggiungerlo.");
+    }
+
+    async function searchPlaces(){
+      const query = els.searchInput.value.trim();
+      if(query.length < 3){
+        setStatus("Scrivi almeno 3 lettere.", false);
+        clearResults();
+        return;
+      }
+
+      setStatus("Ricerca in corso...");
+
+      try{
+        const url = new URL("https://nominatim.openstreetmap.org/search");
+        url.searchParams.set("q", query);
+        url.searchParams.set("format", "jsonv2");
+        url.searchParams.set("limit", "8");
+        url.searchParams.set("addressdetails", "1");
+
+        const res = await fetch(url.toString(), {
+          headers: { "Accept":"application/json" }
+        });
+
+        if(!res.ok) throw new Error("Errore ricerca");
+
+        const data = await res.json();
+        const results = (data || []).map(item => ({
+          name: (item.display_name || "Risultato").split(",")[0],
+          address: item.display_name,
+          lat: Number(item.lat),
+          lon: Number(item.lon)
+        }));
+
+        showResults(results);
+      } catch(e){
+        clearResults();
+        setStatus("Errore durante la ricerca.", false);
+      }
+    }
+
+    async function addStop(name, address, lat, lon){
+      state.stops.push({
+        id: uid(),
+        name,
+        address,
+        lat: Number(lat),
+        lon: Number(lon)
+      });
+
+      state.routeMode = "manuale";
+      clearResults();
+      els.searchInput.value = "";
+      renderAll();
+      await calculateRoute();
+      setStatus("Tappa aggiunta.");
+    }
+
+    async function calculateRoute(){
+      if(state.stops.length < 2){
+        state.totalKm = 0;
+        state.totalMin = 0;
+        state.routeGeo = null;
+        state.stops = state.stops.map(s => ({ ...s, legKm: undefined, legMin: undefined }));
+        renderAll();
+        return;
+      }
+
+      try{
+        setStatus("Calcolo percorso stradale reale...");
+        const coords = state.stops.map(s => `${s.lon},${s.lat}`).join(";");
+        const url = `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson&steps=false`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if(!data.routes || !data.routes.length) throw new Error("Nessun percorso");
+
+        const route = data.routes[0];
+        state.totalKm = route.distance / 1000;
+        state.totalMin = route.duration / 60;
+        state.routeGeo = route.geometry;
+
+        state.stops = state.stops.map((s, i) => ({
+          ...s,
+          legKm: route.legs[i] ? route.legs[i].distance / 1000 : undefined,
+          legMin: route.legs[i] ? route.legs[i].duration / 60 : undefined
+        }));
+
+        renderAll();
+        setStatus("Percorso aggiornato.");
+      } catch(e){
+        setStatus("Errore nel calcolo del percorso.", false);
+      }
+    }
+
+    async function optimizeRoute(){
+      if(state.stops.length < 3){
+        setStatus("Per ottimizzare servono almeno 3 tappe.", false);
+        return;
+      }
+
+      try{
+        setStatus("Ottimizzazione in corso...");
+        const coords = state.stops.map(s => `${s.lon},${s.lat}`).join(";");
+        const url = `https://router.project-osrm.org/trip/v1/driving/${coords}?source=first&destination=last&roundtrip=false&steps=false&overview=false`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if(!data.waypoints || !data.waypoints.length) throw new Error("Errore ottimizzazione");
+
+        const currentStops = [...state.stops];
+        const order = [...data.waypoints]
+          .sort((a,b) => a.waypoint_index - b.waypoint_index)
+          .map(w => w.trips_index);
+
+        state.stops = order.map(i => currentStops[i]);
+        state.routeMode = "ottimizzato";
+
+        await calculateRoute();
+        setStatus("Ordine ottimizzato.");
+      } catch(e){
+        setStatus("Ottimizzazione non riuscita.", false);
+      }
+    }
+
+    function saveTrip(){
+      saveState();
+      setStatus("Viaggio salvato sul telefono.");
+    }
+
+    function resetTrip(){
+      if(!confirm("Vuoi cancellare il viaggio attuale?")) return;
+      state.stops = [];
+      state.routeMode = "manuale";
+      state.totalKm = 0;
+      state.totalMin = 0;
+      state.routeGeo = null;
+      clearResults();
+      renderAll();
+      setStatus("Nuovo viaggio pronto.");
+    }
+
+    function openNavigation(stop){
+      const url = `https://www.google.com/maps/dir/?api=1&destination=${stop.lat},${stop.lon}`;
+      window.open(url, "_blank");
+    }
+
+    els.btnSearch.addEventListener("click", searchPlaces);
+    els.btnClearResults.addEventListener("click", () => {
+      clearResults();
+      setStatus("Risultati puliti.");
+    });
+
+    els.searchInput.addEventListener("keydown", (e) => {
+      if(e.key === "Enter"){
+        e.preventDefault();
+        searchPlaces();
+      }
+    });
+
+    els.results.addEventListener("click", async (e) => {
+      const item = e.target.closest(".result");
+      if(!item) return;
+      await addStop(
+        item.dataset.name,
+        item.dataset.address,
+        item.dataset.lat,
+        item.dataset.lon
+      );
+    });
+
+    els.btnOptimize.addEventListener("click", optimizeRoute);
+    els.btnRecalc.addEventListener("click", calculateRoute);
+    els.btnSave.addEventListener("click", saveTrip);
+    els.btnReset.addEventListener("click", resetTrip);
+
+    els.stopList.addEventListener("click", async (e) => {
+      const btn = e.target.closest("button");
+      if(!btn) return;
+
+      const index = Number(btn.dataset.index);
+      const action = btn.dataset.action;
+
+      if(Number.isNaN(index) || !state.stops[index]) return;
+
+      if(action === "del"){
+        state.stops.splice(index, 1);
+        state.routeMode = "manuale";
+        await calculateRoute();
+      }
+
+      if(action === "up" && index > 0){
+        [state.stops[index - 1], state.stops[index]] = [state.stops[index], state.stops[index - 1]];
+        state.routeMode = "manuale";
+        await calculateRoute();
+      }
+
+      if(action === "down" && index < state.stops.length - 1){
+        [state.stops[index + 1], state.stops[index]] = [state.stops[index], state.stops[index + 1]];
+        state.routeMode = "manuale";
+        await calculateRoute();
+      }
+
+      if(action === "nav"){
+        openNavigation(state.stops[index]);
+      }
+    });
+
+    loadState();
+    renderAll();
+
+    if(state.stops.length >= 2){
+      calculateRoute();
+    } else {
+      setStatus("Pronto. Scrivi e premi Cerca.");
     }
   </script>
 </body>
